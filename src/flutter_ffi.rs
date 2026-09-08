@@ -2311,6 +2311,34 @@ pub fn main_is_installed() -> SyncReturn<bool> {
     SyncReturn(is_installed())
 }
 
+/// Returns true if the current process is running with elevated (Administrator) privileges.
+/// Used in portable mode to decide whether to show ID/password or the permissions prompt.
+pub fn main_is_process_elevated() -> SyncReturn<bool> {
+    #[cfg(windows)]
+    {
+        SyncReturn(
+            crate::platform::is_elevated(None).unwrap_or(false),
+        )
+    }
+    #[cfg(not(windows))]
+    SyncReturn(true) // On non-Windows platforms always treat as elevated
+}
+
+/// Re-launches the current executable with UAC elevation (runas).
+/// The current process exits so the elevated instance takes over.
+pub fn main_request_elevation() {
+    #[cfg(windows)]
+    {
+        let exe = std::env::current_exe()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+        if let Ok(true) = crate::platform::run_uac(&exe, "") {
+            std::process::exit(0);
+        }
+    }
+}
+
 pub fn main_init_input_source() -> SyncReturn<()> {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     crate::keyboard::input_source::init_input_source();

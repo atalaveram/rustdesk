@@ -91,8 +91,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         child: loadLogo(),
       ),
       buildTip(context),
-      if (!isOutgoingOnly) buildIDBoard(context),
-      if (!isOutgoingOnly) buildPasswordBoard(context),
+      if (!isOutgoingOnly && (!isWindows || bind.mainIsProcessElevated())) buildIDBoard(context),
+      if (!isOutgoingOnly && (!isWindows || bind.mainIsProcessElevated())) buildPasswordBoard(context),
+      if (!isOutgoingOnly && isWindows && !bind.mainIsProcessElevated()) _buildPermissionsPrompt(context),
       FutureBuilder<Widget>(
         future: Future.value(
             Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
@@ -184,6 +185,44 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: ConnectionPage(),
+    );
+  }
+
+  /// Shown on Windows portable mode when the process is NOT elevated.
+  /// Explains why permissions are needed and provides a button to re-launch as Administrator.
+  Widget _buildPermissionsPrompt(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      child: Column(
+        children: [
+          Icon(Icons.admin_panel_settings, size: 48, color: Colors.orange),
+          const SizedBox(height: 12),
+          Text(
+            "Para que otros equipos puedan conectarse, el programa necesita permisos de Firewall.",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Su ID y contraseña estarán disponibles después de otorgar los permisos.",
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            icon: Icon(Icons.security),
+            label: Text("Solicitar Permisos (Administrador)"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            onPressed: () {
+              bind.mainRequestElevation();
+            },
+          ),
+        ],
+      ),
     );
   }
 
