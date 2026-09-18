@@ -28,6 +28,8 @@ fn build_manifest() {
     if std::env::var("PROFILE").unwrap() == "release" {
         let mut res = winres::WindowsResource::new();
         res.set_icon("res/icon.ico")
+            .set("FileDescription", "RustDesk - Soporte 4Alpha")
+            .set("ProductName", "RustDesk - Soporte 4Alpha")
             .set_language(winapi::um::winnt::MAKELANGID(
                 winapi::um::winnt::LANG_ENGLISH,
                 winapi::um::winnt::SUBLANG_ENGLISH_US,
