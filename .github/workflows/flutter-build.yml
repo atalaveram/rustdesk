@@ -108,6 +108,7 @@ jobs:
           sed -i 's/rs-ny.rustdesk.com/4alpha.ddns.net/g' libs/hbb_common/src/config.rs
           sed -i 's/OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=/GjLy1QBjnAIF2BIFDHKenmZ1EcKQQdxSRJSHpd3Za2w=/g' libs/hbb_common/src/config.rs
           sed -i 's/RwLock::new("RustDesk".to_owned())/RwLock::new("rustdesk-4alpha".to_owned())/g' libs/hbb_common/src/config.rs
+          sed -i 's/self.get_string(key, "original", vec!\["adaptive"\])/self.get_string(key, "adaptive", vec!["original"])/g' libs/hbb_common/src/config.rs
         shell: bash
 
       - name: Restore bridge files
