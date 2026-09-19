@@ -320,11 +320,11 @@ jobs:
           python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk-4alpha.exe
           popd
           mkdir -p ./SignOutput
-          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/rustdesk-windows-${{ matrix.job.arch }}.exe
+          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/Support_4Alpha.exe
 
       - name: Upload bundled exe
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: rustdesk-windows-${{ matrix.job.arch }}
-          path: ./SignOutput/rustdesk-windows-${{ matrix.job.arch }}.exe
+          name: Support_4Alpha
+          path: ./SignOutput/Support_4Alpha.exe
