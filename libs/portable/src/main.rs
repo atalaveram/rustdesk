@@ -206,6 +206,8 @@ fn main() {
         } else if quick_support {
             args = vec!["--quick_support".to_owned()];
         }
+        #[cfg(windows)]
+        win::create_desktop_shortcut_if_needed(&exe);
         execute(exe, args, ui);
     }
 }
@@ -244,5 +246,37 @@ mod win {
     pub(super) fn is_quick_support_exe(exe: &str) -> bool {
         let exe = exe.to_lowercase();
         exe.contains("-qs-") || exe.contains("-qs.exe") || exe.contains("_qs.exe")
+    }
+
+    /// Creates a desktop shortcut named "Soporte 4Alpha" pointing to the given exe.
+    /// Does nothing if the shortcut already exists.
+    pub(super) fn create_desktop_shortcut_if_needed(target_exe: &Path) {
+        let shortcut_name = "Soporte 4Alpha";
+        // Get the Desktop folder path
+        let desktop = match dirs::desktop_dir() {
+            Some(d) => d,
+            None => return,
+        };
+        let shortcut_path = desktop.join(format!("{}.lnk", shortcut_name));
+        // Skip if already exists
+        if shortcut_path.exists() {
+            return;
+        }
+        let target_str = target_exe.to_string_lossy();
+        let icon_str = target_str.clone(); // Use the exe itself as the icon source
+        let ps_script = format!(
+            "$s=(New-Object -COM WScript.Shell).CreateShortcut('{}'); \
+             $s.TargetPath='{}'; \
+             $s.IconLocation='{}'; \
+             $s.Description='Soporte 4Alpha'; \
+             $s.Save()",
+            shortcut_path.to_string_lossy().replace('\'', "''"),
+            target_str.replace('\'', "''"),
+            icon_str.replace('\'', "''"),
+        );
+        let _ = Command::new("powershell")
+            .args(&["-NoProfile", "-NonInteractive", "-Command", &ps_script])
+            .creation_flags(winapi::um::winbase::CREATE_NO_WINDOW)
+            .output();
     }
 }
